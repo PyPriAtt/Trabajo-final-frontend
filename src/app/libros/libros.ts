@@ -13,11 +13,10 @@ import { Router } from '@angular/router';
         <div class="header">
           <h1>Panel de Administrador</h1>
         </div>
+        <h2>Libros Disponibles</h2>
 
         <div class="actions">
-          <button (click)="navigateTo('usuarios')" class="action-btn" aria-label="Gestionar Usuarios">Gestionar Usuarios</button>
-          <button (click)="navigateTo('libros')" class="action-btn" aria-label="Ver Libros Disponibles">Ver Libros Disponibles</button>
-          <button (click)="navigateTo('prestamos')" class="action-btn" aria-label="Gestionar Préstamos">Gestionar Préstamos</button>
+          <button (click)="navigateTo('admin')" class="action-btn" aria-label="Inicio">Volver</button>
         </div>
 
         <div class="footer">
@@ -112,6 +111,7 @@ export class AdminComponent {
   logout() {
     this.authService.logout();
   }
+
   navigateTo(route: string) {
     this.router.navigate([`/admin/${route}`]);
   }

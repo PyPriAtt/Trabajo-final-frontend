@@ -112,7 +112,10 @@ export class AdminComponent {
   logout() {
     this.authService.logout();
   }
+
+  // Método de navegación ajustado para que sea más claro
   navigateTo(route: string) {
+    // Usamos la ruta relativa desde "/admin"
     this.router.navigate([`/admin/${route}`]);
   }
 }

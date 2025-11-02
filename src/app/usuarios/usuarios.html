@@ -1,0 +1,66 @@
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-user-management',
+  templateUrl: './user-management.component.html',
+  styleUrls: ['./user-management.component.css']
+})
+export class UserManagementComponent {
+  title = 'Gestión de Usuarios';
+  isConnected = true;
+  loading = false;
+  users = [];  // Aquí se almacenan los usuarios
+
+  // Datos para el nuevo usuario
+  newUser = {
+    nombreCompleto: '',
+    email: '',
+    contraseña: ''
+  };
+
+  // Contraseña generada automáticamente
+  generatedPassword: string = '';
+
+  // Función para generar una contraseña aleatoria
+  generateRandomPassword(): string {
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let password = '';
+    for (let i = 0; i < 8; i++) {
+      const randomIndex = Math.floor(Math.random() * charset.length);
+      password += charset[randomIndex];
+    }
+    return password;
+  }
+
+  // Función para crear un nuevo usuario
+  createUser() {
+    if (this.newUser.nombreCompleto && this.newUser.email) {
+      // Generamos la contraseña
+      this.newUser.contraseña = this.generateRandomPassword();
+      this.generatedPassword = this.newUser.contraseña;  // Mostramos la contraseña generada
+
+      // Aquí agregamos el nuevo usuario a la lista de usuarios (simulado)
+      const newUser = {
+        ...this.newUser,
+        activo: true,
+        _id: Math.random().toString(36).substring(7),  // Simulando un ID único
+      };
+
+      this.users.push(newUser);
+
+      // Limpiar campos del formulario después de crear el usuario
+      this.newUser = { nombreCompleto: '', email: '', contraseña: '' };
+      this.generatedPassword = '';
+    }
+  }
+
+  // Función para alternar el estado de activación de un usuario
+  toggleUserStatus(user: any) {
+    user.activo = !user.activo;
+  }
+
+  // Función para eliminar un usuario
+  deleteUser(userId: string) {
+    this.users = this.users.filter((user: any) => user._id !== userId);
+  }
+}
