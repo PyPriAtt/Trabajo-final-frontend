@@ -1,7 +1,8 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -125,12 +126,14 @@ import { AuthService } from '../services/auth';
   `]
 })
 export class LoginComponent {
+  private authService = inject(AuthService);
+  private router = inject(Router);  
   username = '';
   password = '';
   loading = signal(false);
   error = signal('');
 
-  constructor(private authService: AuthService) {}
+  constructor() {}
 
   onLogin() {
     if (!this.username || !this.password) {
@@ -146,6 +149,11 @@ export class LoginComponent {
         this.loading.set(false);
         if (response.success && response.user) {
           this.authService.setUser(response.user);
+          if (response.user.role === 'admin') {
+            this.router.navigate(['/admin']);
+          } else if (response.user.role === 'student') {
+            this.router.navigate(['/student']);
+          }
         } else {
           this.error.set(response.message || 'Error de autenticación');
         }

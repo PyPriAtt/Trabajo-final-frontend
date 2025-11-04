@@ -1,10 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-admin',
+  selector: 'app-user',
   standalone: true,
   imports: [CommonModule],
   template: `
@@ -13,11 +13,10 @@ import { Router } from '@angular/router';
         <div class="header">
           <h1>Panel de Administrador</h1>
         </div>
+        <h2>Gestión de prestamos</h2>
 
         <div class="actions">
-          <button (click)="navigateTo('usuarios')" class="action-btn" aria-label="Gestionar Usuarios">Gestionar Usuarios</button>
-          <button (click)="navigateTo('libros')" class="action-btn" aria-label="Ver Libros Disponibles">Ver Libros Disponibles</button>
-          <button (click)="navigateTo('prestamos')" class="action-btn" aria-label="Gestionar Préstamos">Gestionar Préstamos</button>
+          <button (click)="navigateTo('admin')" class="action-btn" aria-label="Inicio">Volver</button>
         </div>
 
         <div class="footer">
@@ -103,19 +102,16 @@ import { Router } from '@angular/router';
     }
   `]
 })
-export class AdminComponent {
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+export class PrestamosComponent {
+  private router = inject(Router);
+  private authService = inject(AuthService);
 
   logout() {
     this.authService.logout();
+    this.router.navigate(['/']); 
   }
 
-  // Método de navegación ajustado para que sea más claro
   navigateTo(route: string) {
-    // Usamos la ruta relativa desde "/admin"
-    this.router.navigate([`/admin/${route}`]);
+    this.router.navigate([`/${route}`]);
   }
 }

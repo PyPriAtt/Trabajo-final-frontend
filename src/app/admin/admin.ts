@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth';
 import { Router } from '@angular/router';
@@ -104,15 +104,19 @@ import { Router } from '@angular/router';
   `]
 })
 export class AdminComponent {
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  private router = inject(Router);
+  private authService = inject(AuthService);
 
   logout() {
     this.authService.logout();
+    this.router.navigate(['/']);  
   }
-  navigateTo(route: string) {
-    this.router.navigate([`/admin/${route}`]);
-  }
+
+navigateTo(route: string) {
+    console.log('Navegando a:', route);
+    this.router.navigate([route]).then(
+        success => console.log('Navegación exitosa:', success),
+        error => console.log('Error en navegación:', error)
+    );
+}
 }

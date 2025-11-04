@@ -1,10 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-admin',
+  selector: 'app-user',
   standalone: true,
   imports: [CommonModule],
   template: `
@@ -13,7 +13,7 @@ import { Router } from '@angular/router';
         <div class="header">
           <h1>Panel de Administrador</h1>
         </div>
-        <h2>Libros Disponibles</h2>
+        <h2>Gestión de libros</h2>
 
         <div class="actions">
           <button (click)="navigateTo('admin')" class="action-btn" aria-label="Inicio">Volver</button>
@@ -102,17 +102,16 @@ import { Router } from '@angular/router';
     }
   `]
 })
-export class AdminComponent {
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+export class LibrosComponent {
+  private router = inject(Router);
+  private authService = inject(AuthService);
 
   logout() {
     this.authService.logout();
+    this.router.navigate(['/']); 
   }
 
   navigateTo(route: string) {
-    this.router.navigate([`/admin/${route}`]);
+    this.router.navigate([`/${route}`]);
   }
 }
