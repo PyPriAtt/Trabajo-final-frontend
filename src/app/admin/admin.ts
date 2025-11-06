@@ -16,7 +16,7 @@ import { Router } from '@angular/router';
 
         <div class="actions">
           <button (click)="navigateTo('usuarios')" class="action-btn" aria-label="Gestionar Usuarios">Gestionar Usuarios</button>
-          <button (click)="navigateTo('libros')" class="action-btn" aria-label="Ver Libros Disponibles">Ver Libros Disponibles</button>
+          <button (click)="navigateTo('libros')" class="action-btn" aria-label="Gestionar Libros">Gestionar Libros</button>
           <button (click)="navigateTo('prestamos')" class="action-btn" aria-label="Gestionar Préstamos">Gestionar Préstamos</button>
         </div>
 
