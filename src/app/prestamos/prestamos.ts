@@ -1,184 +1,141 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../services/auth';
 import { Router } from '@angular/router';
+import { AuthService } from '../services/auth';
+import { PrestamosService } from '../services/prestamos.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-user',
+  selector: 'app-prestamos',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
+  styleUrls: ['./prestamos.css'],
   template: `
-    <div class="admin-container">
-      <div class="main-content">
-        <div class="header">
-          <h1>Panel de Administrador</h1>
-        </div>
-        <h2>Gestión de prestamos</h2>
-
-        <div class="actions">
-          <button (click)="navigateTo('admin')" class="action-btn" aria-label="Inicio">Volver</button>
-        </div>
-
-        <div class="footer">
-          <button (click)="logout()" class="logout-btn">Cerrar Sesión</button>
-        </div>
-      </div>
+<div class="admin-container">
+  <div class="main-content">
+    <div class="header">
+      <h1>📚 Gestión de Préstamos</h1>
     </div>
+
+    <h2>Asignar nuevo préstamo</h2>
+
+    <div class="form-section">
+      <label>Usuario:</label>
+      <select [(ngModel)]="selectedUsuario">
+        <option value="">Seleccione un usuario</option>
+        <option *ngFor="let u of usuarios" [value]="u._id">
+          {{ u.name }} ({{ u.username }})
+        </option>
+      </select>
+
+      <label>Libro:</label>
+      <select [(ngModel)]="selectedLibro">
+        <option value="">Seleccione un libro</option>
+        <option *ngFor="let l of libros" [value]="l._id">
+          {{ l.titulo }} - {{ l.autor }}
+        </option>
+      </select>
+
+      <label>Fecha de entrega:</label>
+      <input type="date" [(ngModel)]="selectedFechaEntrega" />
+
+      <button (click)="asignarPrestamo()" [disabled]="!selectedUsuario || !selectedLibro || !selectedFechaEntrega">
+        Asignar préstamo
+      </button>
+    </div>
+
+   <h3>Préstamos vigentes</h3>
+<div class="table-wrapper">
+  <table class="custom-table">
+    <thead>
+      <tr>
+        <th>Usuario</th>
+        <th>Libro</th>
+        <th>Fecha préstamo</th>
+        <th>Fecha entrega</th>
+        <th>Acción</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of prestamos">
+        <td>{{ p.usuario.name }}</td>
+        <td>{{ p.libro.titulo }}</td>
+        <td>{{ p.fechaPrestamo | date:'shortDate' }}</td>
+        <td>{{ p.fechaEntrega | date:'shortDate' }}</td>
+        <td>
+          <button class="btn btn-outline-danger" (click)="eliminarPrestamo(p._id)">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<hr>
+
+    <div class="actions">
+      <button (click)="navigateTo('admin')" class="action-btn">Volver</button>
+    </div>
+
+    <div class="footer">
+      <button (click)="logout()" class="logout-btn">Cerrar Sesión</button>
+    </div>
+  </div>
+</div>
+
   `,
-  styles: [`
-    .admin-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: #f8f9fa;
-    }
+styles: [``]
 
-    .main-content {
-      padding: 2rem;
-      text-align: center;
-      width: 100%;
-      max-width: 600px;
-      background-color: #ffffff;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .header {
-      color: black;
-      padding: 1rem 2rem;
-      border-radius: 8px;
-      margin-bottom: 1.5rem;
-    }
-
-    .header h1 {
-      margin: 0;
-      font-size: 2rem;
-    }
-
-    h2 {
-      margin-bottom: 1rem;
-      color: #333;
-    }
-
-    .custom-table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: center;
-    }
-
-    .custom-table th,
-    .custom-table td {
-      text-align: center;
-      vertical-align: middle;
-      padding: 0.75rem;
-      border-bottom: 1px solid #dee2e6;
-    }
-
-    .custom-table th {
-      background-color: #343a40;
-      color: white;
-      font-weight: 600;
-    }
-
-    .custom-table tr:nth-child(even) {
-      background-color: #f8f9fa;
-    }
-
-    .custom-table tr:hover {
-      background-color: #e9ecef;
-    }
-
-    .btn {
-      font-size: 0.9rem;
-      padding: 0.3rem 0.6rem;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .btn-outline-primary {
-      color: #007bff;
-      border: 1px solid #007bff;
-    }
-
-    .btn-outline-primary:hover {
-      background-color: #007bff;
-      color: #fff;
-    }
-
-    .btn-outline-danger {
-      color: #dc3545;
-      border: 1px solid #dc3545;
-    }
-
-    .btn-outline-danger:hover {
-      background-color: #dc3545;
-      color: #fff;
-    }
-
-    .actions {
-      display: flex;
-      justify-content: center;
-      margin-top: 1rem;
-    }
-
-    .action-btn {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
-      cursor: pointer;
-      width: 100%;
-      max-width: 200px;
-      transition: background-color 0.3s;
-      font-size: 1rem;
-    }
-
-    .action-btn:hover {
-      background-color: #0056b3;
-    }
-
-    .footer {
-      margin-top: 1.5rem;
-      display: flex;
-      justify-content: center;
-    }
-
-    .logout-btn {
-      background-color: #dc3545;
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
-      cursor: pointer;
-      width: 100%;
-      max-width: 200px;
-      transition: background-color 0.3s;
-    }
-
-    .logout-btn:hover {
-      background-color: #b02a37;
-    }
-    p {
-      color: #6c757d;
-    }
-  `]
 })
-export class PrestamosComponent {
+
+export class PrestamosComponent implements OnInit {
   private router = inject(Router);
   private authService = inject(AuthService);
+  private prestamosService = inject(PrestamosService);
+
+  usuarios: any[] = [];
+  libros: any[] = [];
+  prestamos: any[] = [];
+
+  selectedUsuario: string = '';
+  selectedLibro: string = '';
+  selectedFechaEntrega: string = '';
+
+  ngOnInit() {
+    this.cargarDatos();
+  }
+
+  cargarDatos() {
+    this.prestamosService.getUsuarios().subscribe(u => this.usuarios = u);
+    this.prestamosService.getLibros().subscribe(l => this.libros = l);
+    this.prestamosService.getPrestamos().subscribe(p => this.prestamos = p);
+  }
+
+  asignarPrestamo() {
+    if (!this.selectedUsuario || !this.selectedLibro || !this.selectedFechaEntrega) return;
+
+    this.prestamosService.crearPrestamo(this.selectedUsuario, this.selectedLibro, this.selectedFechaEntrega)
+      .subscribe({
+        next: (nuevo) => {
+          this.prestamos.push(nuevo);
+          this.selectedUsuario = '';
+          this.selectedLibro = '';
+          this.selectedFechaEntrega = '';
+        }
+      });
+  }
+
+  eliminarPrestamo(id: string) {
+    this.prestamosService.eliminarPrestamo(id).subscribe(() => {
+      this.prestamos = this.prestamos.filter(p => p._id !== id);
+    });
+  }
 
   logout() {
     this.authService.logout();
-    this.router.navigate(['/']); 
+    this.router.navigate(['/']);
   }
 
   navigateTo(route: string) {
     this.router.navigate([`/${route}`]);
   }
 }
+

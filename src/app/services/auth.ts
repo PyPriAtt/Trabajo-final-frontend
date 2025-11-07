@@ -21,8 +21,7 @@ export interface LoginResponse {
 })
 export class AuthService {
   private apiUrl = 'https://trabajo-final-backend-1yb8.onrender.com/api';
-  
-  // Signals para manejo de estado
+
   currentUser = signal<User | null>(null);
   isLoggedIn = signal<boolean>(false);
 
@@ -38,7 +37,6 @@ export class AuthService {
   setUser(user: User) {
     this.currentUser.set(user);
     this.isLoggedIn.set(true);
-    // Proteger localStorage
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem('currentUser', JSON.stringify(user));
     }
@@ -47,14 +45,12 @@ export class AuthService {
   logout() {
     this.currentUser.set(null);
     this.isLoggedIn.set(false);
-    // Proteger localStorage
     if (typeof localStorage !== 'undefined') {
       localStorage.removeItem('currentUser');
     }
   }
 
   checkStoredUser() {
-    // Proteger localStorage
     if (typeof localStorage !== 'undefined') {
       const storedUser = localStorage.getItem('currentUser');
       if (storedUser) {
@@ -63,5 +59,12 @@ export class AuthService {
         this.isLoggedIn.set(true);
       }
     }
+  }
+  getUser(): User | null {
+    if (this.currentUser()) {
+      return this.currentUser();
+    }
+    this.checkStoredUser();
+    return this.currentUser();
   }
 }

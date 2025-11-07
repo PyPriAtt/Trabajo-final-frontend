@@ -1,26 +1,33 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth';
 import { Router } from '@angular/router';
+import { PrestamosService } from '../services/prestamos.service';
 
 @Component({
   selector: 'app-student',
   standalone: true,
   imports: [CommonModule],
+  styleUrls: ['./student.css'],
   template: `
     <div class="student-container">
       <div class="main-content">
         <div class="header">
-          <h1>Portal del Estudiante</h1>
+          <h1>📘 Portal del Estudiante</h1>
+          <p *ngIf="usuario?.name">Bienvenido, <strong>{{ usuario.name }}</strong></p>
         </div>
 
         <div class="content">
           <div class="card">
             <h2>Libros Pedidos:</h2>
-            <ul>
-              <li></li>
-              <li></li>
-              <li></li>
+            <div *ngIf="prestamos.length === 0" class="no-books">
+              <p>No tienes préstamos activos.</p>
+            </div>
+            <ul *ngIf="prestamos.length > 0" class="book-list">
+              <li *ngFor="let p of prestamos">
+                <strong>{{ p.libro.titulo }}</strong> — {{ p.libro.autor }}<br>
+                <small>📅 Entrega: {{ p.fechaEntrega | date:'shortDate' }}</small>
+              </li>
             </ul>
           </div>
         </div>
@@ -30,80 +37,41 @@ import { Router } from '@angular/router';
         </div>
       </div>
     </div>
-  `,
-  styles: [`
-    .student-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: #f8f9fa;
-    }
-
-    .main-content {
-      padding: 2rem;
-      text-align: center;
-      width: 100%;
-      max-width: 500px;
-      background-color: #ffffff;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .header {
-      background-color: #28a745;
-      color: white;
-      padding: 1rem 2rem;
-      border-radius: 8px;
-      margin-bottom: 2rem;
-    }
-
-    .header h1 {
-      margin: 0;
-      font-size: 2rem;
-    }
-
-    .content {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
-
-    .card {
-      background-color: white;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .footer {
-      display: flex;
-      justify-content: center;
-    }
-
-    .logout-btn {
-      background-color: #dc3545;
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
-      cursor: pointer;
-      width: 100%;
-      max-width: 200px;
-    }
-  `]
+  `
 })
-export class StudentComponent {
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+export class StudentComponent implements OnInit {
+  private authService = inject(AuthService);
+  private prestamosService = inject(PrestamosService);
+  private router = inject(Router);
+
+  prestamos: any[] = [];
+  usuario: any = null;
+
+  ngOnInit() {
+    this.usuario = this.authService.getUser();
+    if (!this.usuario) {
+      this.router.navigate(['/']); 
+      return;
+    }
+
+    this.prestamosService.getPrestamosPorUsuario(this.usuario.id).subscribe({
+      next: (prestamosData) => {
+        this.prestamosService.getLibros().subscribe({
+          next: (libros) => {
+            this.prestamos = prestamosData.map(p => {
+              const libro = libros.find(l => l.id === p.libroId);
+              return { ...p, libro: libro ?? { titulo: 'Desconocido', autor: 'Desconocido' } };
+            });
+          },
+          error: (err) => console.error('Error al cargar libros:', err)
+        });
+      },
+      error: (err) => console.error('Error al cargar préstamos:', err)
+    });
+  }
 
   logout() {
     this.authService.logout();
+    this.router.navigate(['/']);
   }
 }
